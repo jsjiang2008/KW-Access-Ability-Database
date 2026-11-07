@@ -208,8 +208,8 @@ def make_handler(store):
                 return self.error(400, str(exc))
             self.send(200, {"ok": True})
 
-        def log_message(self, *args):
-            pass  # Keep buyer details out of the terminal.
+        def log_message(self, format: str, *args: object) -> None:
+            pass  # Keep request paths, including ball-number searches, out of the terminal.
 
     return Handler
 
