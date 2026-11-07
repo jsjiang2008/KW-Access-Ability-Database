@@ -33,6 +33,22 @@ modified, and an output path cannot also be an input path. Selecting the same fi
 twice imports it only once. A missing, unreadable or unsupported workbook stops
 the run without writing a partial export.
 
+## Web dashboard
+
+```sh
+python server.py
+```
+
+Open http://127.0.0.1:8000 (use `--port` to change it). Upload seller `.xlsx`
+files with the button or by dragging them in. The page shows the uploaded files,
+total tickets and revenue, a seller leaderboard, and a ball-number search that
+returns the buyer's name and contact details. **Export CSV** downloads every
+purchase row with its review status and issues.
+
+The dashboard uses the same import rules as `main.py`. It only listens on this
+computer, and uploaded files are kept in a temporary folder that is deleted when
+the server stops, so re-upload them after a restart.
+
 ## Output tabs
 
 - **Seller Summary:** purchase rows, tickets reported, unique ball numbers, sales

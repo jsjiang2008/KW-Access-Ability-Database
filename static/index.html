@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KW AccessAbility · Ball Drop Sales</title>
+<style>
+  :root {
+    --ink: #173d4b; --ink-soft: #4b6a75; --bg: #f4f8f8; --card: #fff; --line: #d9e6e8;
+    --accent: #e8743b; --accent-soft: #fdeee5; --good: #2f8f6b; --warn: #b7791f; --bad: #c0392b;
+    --gold: #e4b23a; --silver: #a9b4bb; --bronze: #c98a55;
+    font-family: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); }
+  header { background: var(--ink); color: #fff; padding: 22px 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  header h1 { margin: 0; font-size: 1.5rem; }
+  header p { margin: 4px 0 0; opacity: .75; font-size: .9rem; }
+  main { max-width: 1180px; margin: 0 auto; padding: 24px 20px 48px; display: grid; gap: 20px; grid-template-columns: 1fr 1fr; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+  section h2 { margin: 0 0 14px; font-size: 1.05rem; }
+  .wide { grid-column: 1 / -1; }
+  button, .btn { font: inherit; border: 0; border-radius: 10px; padding: 10px 16px; cursor: pointer; font-weight: 600; }
+  .primary { background: var(--accent); color: #fff; }
+  .primary:hover { filter: brightness(1.05); }
+  .ghost { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,.6); }
+  .ghost:hover { background: rgba(255,255,255,.1); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+  .stat .label { font-size: .8rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .04em; }
+  .stat .value { font-size: 2rem; font-weight: 700; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .stat.highlight { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .stat.highlight .label { color: rgba(255,255,255,.7); }
+  .drop { border: 2px dashed var(--line); border-radius: 12px; padding: 22px; text-align: center; color: var(--ink-soft); transition: .15s; }
+  .drop.over { border-color: var(--accent); background: var(--accent-soft); }
+  .drop p { margin: 10px 0 0; font-size: .85rem; }
+  ul.files { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
+  ul.files li { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
+  ul.files .fname { flex: 1; font-weight: 600; overflow-wrap: anywhere; }
+  ul.files .meta { color: var(--ink-soft); font-size: .82rem; white-space: nowrap; }
+  ul.files button { background: none; color: var(--bad); padding: 4px 8px; font-size: .82rem; }
+  .empty { color: var(--ink-soft); font-size: .9rem; margin: 12px 0 0; }
+  .champion { display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: 12px; background: linear-gradient(120deg, #fff6dc, #fdeee5); margin-bottom: 14px; }
+  .champion .trophy { font-size: 2.4rem; }
+  .champion strong { font-size: 1.25rem; display: block; }
+  .champion span { color: var(--ink-soft); font-size: .9rem; }
+  ol.board { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  ol.board li { display: grid; grid-template-columns: 38px minmax(120px, 1.2fr) 2fr auto; align-items: center; gap: 12px; padding: 8px 4px; }
+  .rank { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; background: var(--bg); font-size: .9rem; }
+  .r1 .rank { background: var(--gold); color: #fff; } .r2 .rank { background: var(--silver); color: #fff; } .r3 .rank { background: var(--bronze); color: #fff; }
+  .seller { font-weight: 600; overflow-wrap: anywhere; }
+  .seller small { display: block; font-weight: 400; color: var(--ink-soft); font-size: .78rem; }
+  .bar { height: 12px; background: var(--bg); border-radius: 6px; overflow: hidden; }
+  .bar div { height: 100%; background: var(--ink); border-radius: 6px; transition: width .4s; }
+  .r1 .bar div { background: var(--accent); }
+  .nums { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .nums b { font-size: 1.05rem; } .nums small { display: block; color: var(--ink-soft); }
+  .tag { display: inline-block; font-size: .72rem; padding: 2px 8px; border-radius: 999px; background: #fff3d6; color: var(--warn); font-weight: 600; }
+  form.search { display: flex; gap: 10px; }
+  form.search input { flex: 1; font: inherit; padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px; }
+  form.search input:focus { outline: none; border-color: var(--ink); }
+  .results { margin-top: 14px; display: grid; gap: 10px; }
+  .buyer { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px 18px; }
+  .buyer .name { grid-column: 1 / -1; font-size: 1.15rem; font-weight: 700; }
+  .buyer dt { font-size: .75rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .04em; }
+  .buyer dd { margin: 2px 0 0; overflow-wrap: anywhere; }
+  .buyer .issues { grid-column: 1 / -1; color: var(--warn); font-size: .85rem; }
+  .notice { padding: 10px 14px; border-radius: 10px; font-size: .9rem; }
+  .notice.err { background: #fdecea; color: var(--bad); }
+  .notice.warn { background: #fff3d6; color: var(--warn); }
+  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 12px 18px; border-radius: 10px; opacity: 0; transition: .2s; pointer-events: none; max-width: 90vw; }
+  #toast.show { opacity: 1; }
+  #toast.err { background: var(--bad); }
+  @media (max-width: 820px) {
+    main { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    ol.board li { grid-template-columns: 34px 1fr auto; }
+    ol.board .bar { grid-column: 2 / -1; grid-row: 2; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>🎈 Ball Drop Sales Dashboard</h1>
+    <p>KW AccessAbility · combine seller spreadsheets, track totals, look up ball numbers</p>
+  </div>
+  <a class="btn ghost" id="export" href="/api/export.csv" download aria-disabled="true">⬇ Export CSV</a>
+</header>
+
+<main>
+  <div class="stats wide" aria-live="polite">
+    <div class="stat highlight"><div class="label">Total tickets sold</div><div class="value" id="t-tickets">0</div></div>
+    <div class="stat highlight"><div class="label">Total revenue</div><div class="value" id="t-revenue">$0.00</div></div>
+    <div class="stat"><div class="label">Purchases</div><div class="value" id="t-purchases">0</div></div>
+    <div class="stat"><div class="label">Sellers</div><div class="value" id="t-sellers">0</div></div>
+  </div>
+  <div class="wide notice warn" id="review" hidden></div>
+
+  <section>
+    <h2>Seller spreadsheets</h2>
+    <div class="drop" id="drop">
+      <button class="primary" id="pick" type="button">⬆ Upload spreadsheets</button>
+      <input type="file" id="file" accept=".xlsx" multiple hidden>
+      <p>or drag .xlsx files here. Uploading a file with the same name replaces it.</p>
+    </div>
+    <ul class="files" id="files"></ul>
+    <p class="empty" id="no-files">No spreadsheets uploaded yet.</p>
+  </section>
+
+  <section>
+    <h2>Find a ball number</h2>
+    <form class="search" id="search">
+      <input id="q" type="number" min="1" step="1" inputmode="numeric" placeholder="Ball number, e.g. 142" required aria-label="Ball number">
+      <button class="primary" type="submit">Search</button>
+    </form>
+    <div class="results" id="results"></div>
+  </section>
+
+  <section class="wide">
+    <h2>🏆 Seller leaderboard</h2>
+    <div id="champion"></div>
+    <ol class="board" id="board"></ol>
+    <p class="empty" id="no-board">Upload spreadsheets to see the leaderboard.</p>
+  </section>
+</main>
+<div id="toast" role="status"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+const num = new Intl.NumberFormat("en-US");
+
+function el(tag, props = {}, ...children) {
+  const node = document.createElement(tag);
+  Object.assign(node, props);
+  for (const child of children) node.append(child);  // append() treats strings as text, never HTML.
+  return node;
+}
+
+let toastTimer;
+function toast(message, isError = false) {
+  const t = $("toast");
+  t.textContent = message;
+  t.className = "show" + (isError ? " err" : "");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => (t.className = ""), 4000);
+}
+
+async function api(path, options) {
+  const response = await fetch(path, options);
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+  return data;
+}
+
+function render(data) {
+  const { files, leaderboard, totals } = data;
+  $("t-tickets").textContent = num.format(totals.tickets);
+  $("t-revenue").textContent = usd.format(totals.revenue);
+  $("t-purchases").textContent = num.format(totals.purchases);
+  $("t-sellers").textContent = num.format(totals.sellers);
+  $("review").hidden = !totals.review;
+  $("review").textContent = `⚠ ${totals.review} purchase row(s) need review (missing names, quantity mismatches, duplicate balls, etc.). Details are in the exported CSV's Issues column.`;
+
+  const exp = $("export");
+  exp.setAttribute("aria-disabled", String(!totals.purchases));
+  exp.style.opacity = totals.purchases ? 1 : 0.45;
+  exp.style.pointerEvents = totals.purchases ? "auto" : "none";
+
+  $("files").replaceChildren(...files.map((f) => {
+    const remove = el("button", { type: "button", textContent: "Remove", title: `Remove ${f.name}` });
+    remove.onclick = () => removeFile(f.name);
+    return el("li", {}, el("span", { textContent: "📄" }), el("span", { className: "fname", textContent: f.name }),
+      el("span", { className: "meta", textContent: `${f.purchases} purchase${f.purchases === 1 ? "" : "s"} · ${(f.size / 1024).toFixed(0)} KB` }), remove);
+  }));
+  $("no-files").hidden = files.length > 0;
+
+  const max = Math.max(1, ...leaderboard.map((s) => s.tickets));
+  $("board").replaceChildren(...leaderboard.map((s, i) => {
+    const sub = el("small", { textContent: `${s.purchases} purchase${s.purchases === 1 ? "" : "s"} ` });
+    if (s.review) sub.append(el("span", { className: "tag", textContent: `${s.review} to review` }));
+    return el("li", { className: i < 3 && s.tickets ? `r${i + 1}` : "" },
+      el("span", { className: "rank", textContent: i + 1 }),
+      el("span", { className: "seller", textContent: s.seller }, sub),
+      el("div", { className: "bar" }, el("div", { style: `width:${(s.tickets / max) * 100}%` })),
+      el("span", { className: "nums" }, el("b", { textContent: `${num.format(s.tickets)} tickets` }), el("small", { textContent: usd.format(s.revenue) })));
+  }));
+  $("no-board").hidden = leaderboard.length > 0;
+
+  const top = leaderboard[0];
+  const tied = top ? leaderboard.filter((s) => s.tickets === top.tickets) : [];
+  $("champion").replaceChildren(top && top.tickets ? el("div", { className: "champion" },
+    el("span", { className: "trophy", textContent: "🏆" }),
+    el("div", {},
+      el("strong", { textContent: tied.length > 1 ? `Tie: ${tied.map((s) => s.seller).join(", ")}` : `${top.seller} is the top seller!` }),
+      el("span", { textContent: `${num.format(top.tickets)} tickets sold${tied.length > 1 ? " each" : ` · ${usd.format(top.revenue)} in sales`}` }))) : "");
+}
+
+async function refresh() {
+  try { render(await api("/api/summary")); }
+  catch (e) { toast(e.message, true); }
+}
+
+async function upload(fileList) {
+  const files = [...fileList];
+  if (!files.length) return;
+  let ok = 0;
+  for (const file of files) {
+    if (!file.name.toLowerCase().endsWith(".xlsx")) { toast(`${file.name}: only .xlsx files are supported.`, true); continue; }
+    try {
+      await api("/api/files", { method: "POST", headers: { "X-Filename": encodeURIComponent(file.name) }, body: file });
+      ok++;
+    } catch (e) { toast(`${file.name}: ${e.message}`, true); }
+  }
+  if (ok) toast(`Uploaded ${ok} file${ok === 1 ? "" : "s"}.`);
+  await refresh();
+  if ($("q").value) runSearch();
+}
+
+async function removeFile(name) {
+  if (!confirm(`Remove ${name} from the dashboard?`)) return;
+  try { await api(`/api/files/${encodeURIComponent(name)}`, { method: "DELETE" }); toast(`Removed ${name}.`); }
+  catch (e) { toast(e.message, true); }
+  await refresh();
+  if ($("q").value) runSearch();
+}
+
+async function runSearch() {
+  const q = $("q").value.trim();
+  const box = $("results");
+  if (!/^\d+$/.test(q) || Number(q) < 1) { box.replaceChildren(el("div", { className: "notice err", textContent: "Enter a positive whole ball number." })); return; }
+  try {
+    const { number, matches } = await api(`/api/search/${q}`);
+    if (!matches.length) { box.replaceChildren(el("p", { className: "empty", textContent: `No buyer found for ball #${number}.` })); return; }
+    const cards = matches.map((m) => {
+      const field = (label, value) => el("div", {}, el("dt", { textContent: label }), el("dd", { textContent: value || "—" }));
+      const card = el("dl", { className: "buyer" },
+        el("div", { className: "name", textContent: `#${number} · ${m.name || "(no name)"}` }),
+        field("Phone", m.phone), field("Email", m.email),
+        field("Address", [m.street, m.city].filter(Boolean).join(", ")),
+        field("Sold by", m.seller), field("Tickets in purchase", m.tickets ?? "—"), field("Source", m.source));
+      if (m.issues.length) card.append(el("div", { className: "issues", textContent: "⚠ " + m.issues.join(" ") }));
+      return card;
+    });
+    if (matches.length > 1) cards.unshift(el("div", { className: "notice warn", textContent: `Ball #${number} is assigned to ${matches.length} purchases. Check with the sellers.` }));
+    box.replaceChildren(...cards);
+  } catch (e) { box.replaceChildren(el("div", { className: "notice err", textContent: e.message })); }
+}
+
+$("pick").onclick = () => $("file").click();
+$("file").onchange = (e) => { upload(e.target.files); e.target.value = ""; };
+const drop = $("drop");
+drop.ondragover = (e) => { e.preventDefault(); drop.classList.add("over"); };
+drop.ondragleave = () => drop.classList.remove("over");
+drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove("over"); upload(e.dataTransfer.files); };
+$("search").onsubmit = (e) => { e.preventDefault(); runSearch(); };
+refresh();
+</script>
+</body>
+</html>
