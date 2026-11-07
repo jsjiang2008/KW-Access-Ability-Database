@@ -158,10 +158,13 @@ def read_sheet(sheet, formulas, path, result):
         row_labels = {label(sheet.cell(row_num, c).value) for c in range(1, mapping["numberBought"])}
         quantity_formula = text(formulas.cell(row_num, mapping["numberBought"]).value).upper()
         has_ball_entries = any(text(sheet.cell(row_num, c).value) for c in ball_columns)
+        summary_label = row_labels & {"ballssold", "totalsales"}
         if (row_labels & {"total", "totals", "grandtotal", "ballssold", "totalsales"}
-                and not has_ball_entries
-                and (quantity_formula.startswith("=SUM(")
-                     or label(sheet.cell(row_num, mapping["name"]).value) in {"total", "totals", "grandtotal"})):
+                and ((summary_label and quantity_formula.startswith("=SUM("))
+                     or (not has_ball_entries
+                         and (quantity_formula.startswith("=SUM(")
+                              or label(sheet.cell(row_num, mapping["name"]).value)
+                              in {"total", "totals", "grandtotal"})))):
             break
         cells = {key: sheet.cell(row_num, col) for key, col in mapping.items()}
         ball_cells = [sheet.cell(row_num, col) for col in ball_columns]

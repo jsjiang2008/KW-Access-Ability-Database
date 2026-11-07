@@ -72,6 +72,24 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual(rec.issues, [])
         self.assertTrue(any("Skipped" in item[3] for item in result.log))
 
+    def test_summary_footer_with_ball_label_is_not_imported_as_purchase(self):
+        path = self.template(rows=[{"A": "Buyer", "F": 1, "I": 585}])
+        book = load_workbook(path)
+        book["Sheet1"]["J105"] = "Ball Numbers Entered"
+        book["Sheet1"]["E106"] = "1/$20"
+        book["Sheet1"]["F106"] = '=COUNTIF(F4:F104,"=1")+COUNTIF(F4:F104,"=2")*2'
+        book["Sheet1"]["E107"] = "3/$50"
+        book["Sheet1"]["F107"] = "=(F105-F106)/3"
+        book.save(path)
+        book.close()
+
+        result = import_workbooks([path])
+
+        self.assertEqual(len(result.records), 1)
+        self.assertEqual(result.records[0].name, "Buyer")
+        self.assertEqual(result.records[0].sourceRow, 4)
+        self.assertEqual(result.records[0].issues, [])
+
     def test_combine_sellers_and_multiple_sales_sheets(self):
         one = self.template("one.xlsx", rows=[{"A": "Buyer One", "F": 3, "I": 1, "J": 2, "K": 3}])
         book = load_workbook(one)
