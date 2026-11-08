@@ -2,3 +2,12 @@ __pycache__/
 .venv/
 *.xlsx
 *.xlsm
+exports/
+*.csv
+data/
+*.sqlite3*
+*.db
+backups/
+.env
+*.pem
+*.key

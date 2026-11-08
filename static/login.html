@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in · KW AccessAbility</title>
+  <link rel="stylesheet" href="/assets/login.css">
+  <script src="/assets/login.js" defer></script>
+</head>
+<body>
+  <main>
+    <p class="brand">KW AccessAbility</p>
+    <h1>Ball Drop Sales</h1>
+    <p>Sign in to manage seller spreadsheets and view buyer information.</p>
+    <form id="login">
+      <label for="username">Username</label>
+      <input id="username" name="username" autocomplete="username" maxlength="64" required autofocus>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" maxlength="128" required>
+      <p id="error" role="alert" hidden></p>
+      <button id="submit" type="submit" disabled>Sign in</button>
+    </form>
+    <p class="help">Need access or a password reset? Contact your fundraiser administrator.</p>
+  </main>
+</body>
+</html>

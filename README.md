@@ -36,18 +36,38 @@ the run without writing a partial export.
 ## Web dashboard
 
 ```sh
-python server.py
+python -m pip install -r requirements.txt
+python manage.py create-user admin
+python server.py --dev-http
 ```
 
-Open http://127.0.0.1:8000 (use `--port` to change it). Upload seller `.xlsx`
+The account command prompts for a password without displaying it. There are no
+default credentials or public sign-ups. Create a separate account for each staff
+member; all staff accounts currently have access to all fundraiser data.
+
+For local development, open http://127.0.0.1:8000 and sign in (use `--port` to change it). Upload seller `.xlsx`
 files with the button or by dragging them in. The page shows the uploaded files,
 total tickets and revenue, a seller leaderboard, and a ball-number search that
 returns the buyer's name and contact details. **Export CSV** downloads every
 purchase row with its review status and issues.
 
-The dashboard uses the same import rules as `main.py`. It only listens on this
-computer, and uploaded files are kept in a temporary folder that is deleted when
-the server stops, so re-upload them after a restart.
+The dashboard uses the same import rules as `main.py`. Original uploaded workbooks,
+accounts and revocable sessions are stored in `data/ball_drop.sqlite3`, and uploads
+survive restarts. The default data location is relative to the project, not your
+terminal's current folder. Use `--data-dir` or `BALL_DROP_DATA_DIR` to choose a
+different persistent disk. Keep this database out of Git and web-served folders.
+Uploads from the older temporary-storage version must be uploaded once more.
+
+Every buyer API and CSV download requires login. Passwords use salted scrypt
+hashes, sessions expire after eight hours, sign-in attempts are rate-limited, and
+uploads, deletions and sign-out require CSRF tokens. Password resets immediately
+invalidate the user's existing sessions. There is no public account-management API.
+
+**Public hosting uses HTTPS by default**, with secure cookies and HTTPS enforcement.
+`--dev-http` is an explicit exception restricted to loopback access on your computer.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the Docker/Caddy deployment, automatic TLS
+certificates, account administration, backups and restores. A domain and hosting
+server must be configured before public HTTPS can be activated.
 
 ## Output tabs
 
@@ -116,8 +136,11 @@ with 4 ball numbers; it is retained and marked for review.
 `Record.py` keeps the original eight constructor fields and the lowercase `record`
 alias, adding seller, payment, notes, source and validation information.
 `workbooks.py` handles import, validation, aggregation and export. `main.py` provides
-interactive and command-line entry points. No database or internet connection is
-needed during use.
+interactive and command-line entry points. `server.py` serves the Flask application
+through Waitress, `auth.py` handles staff authentication, `storage.py` persists
+workbooks and accounts in SQLite, and `manage.py` provides local administration.
+Browser code lives in `static/`. Caddy handles public TLS in the supplied deployment.
+The command-line spreadsheet merger still works without a database or login.
 
 ```sh
 python -m unittest discover -s tests -v

@@ -1,17 +1,16 @@
 """Exercise uploads and CSV downloads through the dashboard's HTTP endpoints."""
 
 import csv
-from http.client import HTTPConnection
-from http.server import ThreadingHTTPServer
 import io
 import json
-import threading
+import tempfile
+from pathlib import Path
 import unittest
 from urllib.parse import quote
 
 from openpyxl import Workbook
 
-from server import CSV_COLUMNS, Store, make_handler
+from server import CSV_COLUMNS, create_app
 
 
 def workbook_bytes(rows):
@@ -40,26 +39,31 @@ def purchase(name="Buyer", numbers="101-103", **changes):
 
 class CsvDownloadTests(unittest.TestCase):
     def setUp(self):
-        self.store = Store()
-        self.addCleanup(self.store.folder.cleanup)
-        self.server = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(self.store))
-        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
-        self.thread.start()
-        self.addCleanup(self.stop_server)
+        self.directory = tempfile.TemporaryDirectory()
+        self.addCleanup(self.directory.cleanup)
+        self.app = create_app(self.directory.name, dev_http=True)
+        self.store = self.app.extensions["store"]
+        self.auth = self.app.extensions["auth"]
+        self.password = "a-long-test-passphrase"
+        self.auth.set_password("staff", self.password, create=True)
+        self.client = self.app.test_client()
+        self.login()
 
-    def stop_server(self):
-        self.server.shutdown()
-        self.server.server_close()
-        self.thread.join(timeout=5)
+    def login(self, client=None, password=None):
+        client = client or self.client
+        csrf = client.get("/api/session").json["csrfToken"]
+        response = client.post("/api/login", json={"username": "staff", "password": password or self.password},
+                               headers={"X-CSRF-Token": csrf})
+        self.assertEqual(response.status_code, 200, response.data)
+        self.csrf = response.json["csrfToken"]
+        return response
 
     def request(self, method, path, data=None, headers=None):
-        connection = HTTPConnection(*self.server.server_address, timeout=10)
-        try:
-            connection.request(method, path, body=data, headers=headers or {})
-            response = connection.getresponse()
-            return response.status, dict(response.getheaders()), response.read()
-        finally:
-            connection.close()
+        headers = dict(headers or {})
+        if method not in {"GET", "HEAD"}:
+            headers.setdefault("X-CSRF-Token", self.csrf)
+        response = self.client.open(path, method=method, data=data, headers=headers)
+        return response.status_code, dict(response.headers), response.data
 
     def upload(self, filename, rows):
         status, _, body = self.request("POST", "/api/files", workbook_bytes(rows),
