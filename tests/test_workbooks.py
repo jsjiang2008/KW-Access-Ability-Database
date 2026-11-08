@@ -90,6 +90,20 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual(result.records[0].sourceRow, 4)
         self.assertEqual(result.records[0].issues, [])
 
+    def test_plain_seller_titles_override_copied_tab_names(self):
+        paths = []
+        for number, seller in enumerate(["A", "B", "C"], 1):
+            path = self.template(f"copy{number}.xlsx", seller,
+                                 [{"A": "Buyer", "F": 1, "I": number}])
+            book = load_workbook(path)
+            book["Sheet1"].title = "Sarah"
+            book.save(path)
+            book.close()
+            paths.append(path)
+        result = import_workbooks(paths)
+        self.assertEqual([r.seller for r in result.records], ["A", "B", "C"])
+        self.assertEqual(result.sellers, {"A", "B", "C"})
+
     def test_combine_sellers_and_multiple_sales_sheets(self):
         one = self.template("one.xlsx", rows=[{"A": "Buyer One", "F": 3, "I": 1, "J": 2, "K": 3}])
         book = load_workbook(one)

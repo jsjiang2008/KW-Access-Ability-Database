@@ -89,7 +89,9 @@ individual positive integers, comma/semicolon/space-separated lists, or inclusiv
 ranges such as `101-103`. Decimal ticket numbers, negative numbers and invalid
 text are flagged; valid numbers from the same row are retained.
 
-Set the form's A1 title to e.g. `Edward F Sales 1`. Multiple sheets titled
+Set the supplied form's A1 title to a plain seller name such as `Edward F`, or
+to `Edward F Sales 1`. This takes precedence over a copied worksheet tab name.
+Multiple sheets titled
 `Edward F Sales 1` and `Edward F Sales 2` are grouped under `Edward F`. A `Seller`
 column can instead specify the seller on each row. Otherwise a named worksheet is
 used. Generic sheets with an unchanged `Name Sales 1` title use the file/sheet name

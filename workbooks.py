@@ -77,7 +77,7 @@ def find_header(sheet, formulas):
     return None
 
 
-def seller_for(sheet, path, header_row):
+def seller_for(sheet, path, header_row, template=False):
     for row in sheet.iter_rows(max_row=header_row - 1) if header_row > 1 else []:
         for cell in row:
             value = text(cell.value)
@@ -88,6 +88,13 @@ def seller_for(sheet, path, header_row):
                 name = text(sheet.cell(cell.row, cell.column + 1).value)
                 if name:
                     return name, False
+    # This form reserves A1 for the seller. Copied sheets can retain another
+    # seller's tab name even after A1 has been changed to a plain name.
+    if template and header_row > 1:
+        title = text(sheet.cell(1, 1).value)
+        if (title and not re.search(r"\bsales\b", title, re.I)
+                and label(title) not in {"name", "seller", "salesperson", "soldby"}):
+            return title, False
     if not re.fullmatch(r"Sheet\d*", sheet.title, re.I):
         return re.sub(r"\s+(?:Sales\s+)?\d+$", "", sheet.title, flags=re.I), False
     return f"{path.stem} / {sheet.title}", True
@@ -148,7 +155,7 @@ def read_sheet(sheet, formulas, path, result):
         result.log.append((str(path), sheet.title, 0, "Skipped: no supported buyer table"))
         return False
     header_row, mapping, ball_columns, template = header
-    seller, unnamed = seller_for(sheet, path, header_row)
+    seller, unnamed = seller_for(sheet, path, header_row, template)
     if not unnamed and "seller" not in mapping:
         result.sellers.add(seller)
     count = 0

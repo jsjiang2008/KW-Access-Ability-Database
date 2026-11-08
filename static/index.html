@@ -25,6 +25,7 @@
   .primary:hover { filter: brightness(1.05); }
   .ghost { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,.6); }
   .ghost:hover { background: rgba(255,255,255,.1); }
+  #export[aria-disabled="true"] { opacity: .45; pointer-events: none; }
   button:disabled { opacity: .45; cursor: not-allowed; }
   .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
   .stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
@@ -86,7 +87,7 @@
     <h1>🎈 Ball Drop Sales Dashboard</h1>
     <p>KW AccessAbility · combine seller spreadsheets, track totals, look up ball numbers</p>
   </div>
-  <a class="btn ghost" id="export" href="/api/export.csv" download aria-disabled="true">⬇ Export CSV</a>
+  <a class="btn ghost" id="export" href="/api/export.csv" download aria-disabled="true" tabindex="-1">⬇ Export CSV</a>
 </header>
 
 <main>
@@ -166,8 +167,7 @@ function render(data) {
 
   const exp = $("export");
   exp.setAttribute("aria-disabled", String(!totals.purchases));
-  exp.style.opacity = totals.purchases ? 1 : 0.45;
-  exp.style.pointerEvents = totals.purchases ? "auto" : "none";
+  exp.tabIndex = totals.purchases ? 0 : -1;
 
   $("files").replaceChildren(...files.map((f) => {
     const remove = el("button", { type: "button", textContent: "Remove", title: `Remove ${f.name}` });
@@ -249,6 +249,9 @@ async function runSearch() {
   } catch (e) { box.replaceChildren(el("div", { className: "notice err", textContent: e.message })); }
 }
 
+$("export").onclick = (e) => {
+  if ($("export").getAttribute("aria-disabled") === "true") e.preventDefault();
+};
 $("pick").onclick = () => $("file").click();
 $("file").onchange = (e) => { upload(e.target.files); e.target.value = ""; };
 const drop = $("drop");
