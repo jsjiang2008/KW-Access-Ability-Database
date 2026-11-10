@@ -1,6 +1,6 @@
 # KW-Access-Ability-Database
 Communihacks 2026 project by me, Tim Xia, Chester Wang, and Jason Qian!
-Winner of **[MLH] Best Domain Name from GoDaddy Registry**! Thank you GoDaddy for giving us 70 dollars.
+Winner of **[MLH] Best Domain Name from GoDaddy Registry**! Thank you GoDaddy for giving us 50 USD to each of us 😀👍!
 
 Combine ball-drop seller spreadsheets into one Excel workbook. The first tab
 summarizes each seller's ticket quantities and dollar sales; the next tab contains
